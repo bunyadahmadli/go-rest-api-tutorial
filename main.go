@@ -7,6 +7,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 )
 
 type User struct {
@@ -53,11 +54,21 @@ func addUser(c echo.Context) error {
 	fmt.Println(user)
 	return c.String(http.StatusOK, "Başarılı")
 }
+func mainAdmin(c echo.Context) error {
+	return c.String(http.StatusOK, "Admin endpointindesin")
+}
 
 func main() {
 	e := echo.New()
-
+	e.Use(middleware.LoggerWithConfig(
+		middleware.LoggerConfig{
+			Format: "statusCode: ${status}",
+		}))
 	e.GET("/home", mainHandler)
+
+	adminGroup := e.Group("/admin", middleware.Logger())
+	adminGroup.GET("/main", mainAdmin)
+
 	e.GET("/user/:data", getUser)
 	e.POST("/user", addUser)
 
