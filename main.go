@@ -66,9 +66,15 @@ func main() {
 		}))
 	e.GET("/home", mainHandler)
 
-	adminGroup := e.Group("/admin", middleware.Logger())
-	adminGroup.GET("/main", mainAdmin)
+	adminGroup := e.Group("/admin")
 
+	adminGroup.GET("/main", mainAdmin)
+	adminGroup.Use(middleware.BasicAuth(func(username, password string, c echo.Context) (bool, error) {
+		if username == "admin" && password == "123" {
+			return true, nil
+		}
+		return false, nil
+	}))
 	e.GET("/user/:data", getUser)
 	e.POST("/user", addUser)
 
