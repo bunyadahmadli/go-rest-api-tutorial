@@ -58,6 +58,17 @@ func mainAdmin(c echo.Context) error {
 	return c.String(http.StatusOK, "Admin endpointindesin")
 }
 
+func setHeader(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		contentType := c.Request().Header.Get("Content-Type")
+		if contentType != "application/json" {
+			return c.JSON(http.StatusBadRequest, "Sadece Application/json tipinde istek atılabilir!")
+		}
+
+		return next(c)
+	}
+}
+
 func main() {
 	e := echo.New()
 	e.Use(middleware.LoggerWithConfig(
@@ -65,7 +76,7 @@ func main() {
 			Format: "statusCode: ${status}",
 		}))
 	e.GET("/home", mainHandler)
-
+	e.Use(setHeader)
 	adminGroup := e.Group("/admin")
 
 	adminGroup.GET("/main", mainAdmin)
